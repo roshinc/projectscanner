@@ -116,7 +116,15 @@ public class UsageDetector {
             if ("instance".equals(targetInvocation.getExecutable().getSimpleName())) {
                 CtExpression<?> instanceTarget = targetInvocation.getTarget();
                 if (instanceTarget != null) {
-                    CtTypeReference<?> typeRef = instanceTarget.getType();
+                    CtTypeReference<?> typeRef = null;
+
+                    // Handle CtTypeAccess (e.g., MyTestFnFunction.instance())
+                    if (instanceTarget instanceof CtTypeAccess<?> typeAccess) {
+                        typeRef = typeAccess.getAccessedType();
+                    } else {
+                        // Regular expression type
+                        typeRef = instanceTarget.getType();
+                    }
                     if (typeRef != null) {
                         String typeName = typeRef.getSimpleName();
                         // Check if it matches our function class names
