@@ -579,14 +579,21 @@ public class UsageDetector {
         try {
             var variable = variableRead.getVariable().getDeclaration();
             if (variable instanceof CtField<?> field) {
-                // Check if it's a static final String
-                if (field.isFinal() && field.isStatic()) {
-                    CtExpression<?> defaultExpression = field.getDefaultExpression();
-                    if (defaultExpression instanceof CtLiteral<?> literal) {
-                        Object value = literal.getValue();
-                        if (value instanceof String stringValue) {
-                            return stringValue;
-                        }
+                CtExpression<?> defaultExpression = field.getDefaultExpression();
+                if (defaultExpression instanceof CtLiteral<?> literal) {
+                    Object value = literal.getValue();
+                    if (value instanceof String stringValue) {
+                        return stringValue;
+                    }
+                }
+
+            } else if (variable instanceof CtLocalVariable<?> localVar) {
+                // Local variable - check if initialized with a string literal
+                CtExpression<?> defaultExpression = localVar.getDefaultExpression();
+                if (defaultExpression instanceof CtLiteral<?> literal) {
+                    Object value = literal.getValue();
+                    if (value instanceof String stringValue) {
+                        return stringValue;
                     }
                 }
             }

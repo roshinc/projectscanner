@@ -15,7 +15,10 @@ class SourceAnalyzerTest {
     @Test
     void getReport() {
         SourceAnalyzer analyzer = new SourceAnalyzer();
-        assertNotNull(analyzer.getReport(PROJECT_PATH, AnalysisConfig.UNLIMITED));
+        AnalysisReport report = analyzer.getReport(PROJECT_PATH, AnalysisConfig.UNLIMITED);
+        assertNotNull(report);
+        System.out.println(report.edaPublishUsages());
+
     }
 
     @Test
