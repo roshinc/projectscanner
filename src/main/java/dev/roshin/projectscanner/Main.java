@@ -1,4 +1,4 @@
-package dev.roshin.code_meta_scanner;
+package dev.roshin.projectscanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.

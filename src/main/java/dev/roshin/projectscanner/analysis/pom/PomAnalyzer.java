@@ -1,4 +1,4 @@
-package dev.roshin.project_scanner.analyzer;
+package dev.roshin.projectscanner.analysis.pom;
 
 import com.google.common.collect.Sets;
 import org.apache.maven.model.Model;
