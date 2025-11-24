@@ -3,6 +3,7 @@ package dev.roshin.projectscanner.analysis.core;
 import dev.roshin.projectscanner.analysis.config.AnalysisConfig;
 import dev.roshin.projectscanner.analysis.model.*;
 import dev.roshin.projectscanner.analysis.pom.PomAnalyzer;
+import dev.roshin.projectscanner.analysis.spoon.CallGraphWalker;
 import dev.roshin.projectscanner.analysis.spoon.UsageDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,8 @@ public class SourceAnalyzer {
         }
 
         // Phase 3: Detect usages
-        UsageDetector detector = new UsageDetector(model, config);
+        CallGraphWalker callGraphWalker = new CallGraphWalker(model, config, warnings);
+        UsageDetector detector = new UsageDetector(model, config, callGraphWalker);
 
         List<FunctionClientUsage> functionClientUsages;
         List<ServiceUsage> serviceUsages;

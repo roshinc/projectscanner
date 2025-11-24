@@ -38,10 +38,12 @@ public class UsageDetector {
 
     private final CtModel model;
     private final AnalysisConfig config;
+    private final CallGraphWalker callGraphWalker;
 
-    public UsageDetector(CtModel model, AnalysisConfig config) {
+    public UsageDetector(CtModel model, AnalysisConfig config, CallGraphWalker callGraphWalker) {
         this.model = model;
         this.config = config;
+        this.callGraphWalker = callGraphWalker;
     }
 
     /**
@@ -180,8 +182,8 @@ public class UsageDetector {
         // Build source location
         SourceLocation location = buildSourceLocation(invocation);
 
-        // Call chain will be populated in Phase 4
-        List<CallChainEntry> callChain = List.of();
+        // Build call chain
+        List<CallChainEntry> callChain = buildCallChain(invocation);
 
         return new FunctionClientUsage(
                 functionId,
@@ -300,7 +302,7 @@ public class UsageDetector {
                                 packageName,
                                 UsageType.INSTANTIATION,
                                 buildSourceLocation(call),
-                                List.of(), // Call chain in Phase 4
+                                buildCallChain(call),
                                 type.getSimpleName(),
                                 null // No method for instantiation
                         );
@@ -352,7 +354,7 @@ public class UsageDetector {
                                 packageName,
                                 UsageType.METHOD_CALL,
                                 buildSourceLocation(invocation),
-                                List.of(), // Call chain in Phase 4
+                                buildCallChain(invocation),
                                 targetType.getSimpleName(),
                                 invocation.getExecutable().getSimpleName()
                         );
@@ -410,7 +412,7 @@ public class UsageDetector {
                                 packageName,
                                 UsageType.STATIC_METHOD,
                                 buildSourceLocation(invocation),
-                                List.of(), // Call chain in Phase 4
+                                buildCallChain(invocation),
                                 declaringType.getSimpleName(),
                                 executable.getSimpleName()
                         );
@@ -482,7 +484,7 @@ public class UsageDetector {
                         topicResolution.status,
                         topicResolution.variableType,
                         buildSourceLocation(invocation),
-                        List.of(), // Call chain in Phase 4
+                        buildCallChain(invocation),
                         messageDataType
                 );
 
@@ -652,6 +654,34 @@ public class UsageDetector {
         }
 
         return new SourceLocation(filePath, className, methodName, lineNumber);
+    }
+
+    /**
+     * Builds call chain(s) from a usage element using CallGraphWalker.
+     * Returns the first (primary) call chain, or empty list if none found.
+     */
+    private List<CallChainEntry> buildCallChain(CtElement element) {
+        try {
+            List<List<CallChainEntry>> allChains = callGraphWalker.buildCallChains(element);
+
+            if (allChains.isEmpty()) {
+                return List.of();
+            }
+
+            // Return the first (typically shortest or most relevant) chain
+            // In the future, we could handle multiple chains differently
+            List<CallChainEntry> primaryChain = allChains.get(0);
+
+            if (allChains.size() > 1) {
+                log.debug("Multiple call chains found ({} total), using primary chain",
+                        allChains.size());
+            }
+
+            return primaryChain;
+        } catch (Exception e) {
+            log.warn("Failed to build call chain: {}", e.getMessage());
+            return List.of();
+        }
     }
 
     /**
