@@ -243,6 +243,19 @@ public class CallGraphWalker {
             return false;
         }
 
+        // Match parameter count
+        if (executable.getParameters() == null ||
+                executable.getParameters().size() != targetMethod.getParameters().size()) {
+            return false;
+        }
+
+        // Match parameter types
+//        for (int i = 0; i < executable.getParameters().size(); i++) {
+//            String callType = executable.getParameters().get(i).getQualifiedName();
+//            String targetType = targetMethod.getParameters().get(i).getType().getQualifiedName();
+//            if (!callType.equals(targetType)) return false;
+//        }
+
         // Optionally check parameter types for overloaded methods
         // For now, matching by name and class is sufficient
 

@@ -2,9 +2,12 @@ package dev.roshin.projectscanner.analysis.core;
 
 import dev.roshin.projectscanner.analysis.config.AnalysisConfig;
 import dev.roshin.projectscanner.analysis.model.AnalysisReport;
+import dev.roshin.projectscanner.analysis.model.CallChainEntry;
+import dev.roshin.projectscanner.analysis.model.EdaPublishUsage;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -17,7 +20,13 @@ class SourceAnalyzerTest {
         SourceAnalyzer analyzer = new SourceAnalyzer();
         AnalysisReport report = analyzer.getReport(PROJECT_PATH, AnalysisConfig.UNLIMITED);
         assertNotNull(report);
-        System.out.println(report.edaPublishUsages());
+        EdaPublishUsage edaUsage = report.edaPublishUsages().get(3);
+        assertNotNull(edaUsage);
+        System.out.println("EDA Publish Usage: " + edaUsage);
+        List<CallChainEntry> callChain = edaUsage.callChain();
+        for (CallChainEntry entry : callChain) {
+            System.out.println("  Call Chain Entry: " + entry);
+        }
 
     }
 

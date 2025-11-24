@@ -4,6 +4,7 @@ import dev.roshin.projectscanner.analysis.config.AnalysisConfig;
 import dev.roshin.projectscanner.analysis.model.*;
 import dev.roshin.projectscanner.analysis.pom.PomAnalyzer;
 import dev.roshin.projectscanner.analysis.spoon.CallGraphWalker;
+import dev.roshin.projectscanner.analysis.spoon.SmartServiceDetector;
 import dev.roshin.projectscanner.analysis.spoon.UsageDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,17 @@ public class SourceAnalyzer {
             log.error("Failed to build Spoon model", e);
             return createErrorReport(projectRoot, startTime, startMs,
                     "Failed to parse project: " + e.getMessage());
+        }
+
+        // Detect type of codebase
+        SmartServiceDetector smartServiceDetector = new SmartServiceDetector();
+        SmartServiceDetector.SmartServiceInfo codeBaseType = smartServiceDetector.analyze(model, pomAnalyzer);
+
+        log.debug("Codebase type detected: {}", codeBaseType != null ? (codeBaseType.isUiService() ? "UI Service" : "Regular Service")
+                : "Unknown / Non-Smart Service");
+
+        if (codeBaseType != null && !codeBaseType.isUiService()) {
+            log.debug("Codebase functions: {}", codeBaseType.functionMethods());
         }
 
         // Phase 3: Detect usages

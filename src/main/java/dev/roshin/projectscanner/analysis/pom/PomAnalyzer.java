@@ -16,6 +16,8 @@ public class PomAnalyzer {
     private static final String FUNCTIONS_GROUP = "dev.myorg.functions";
     private static final String FUNC_CLIENT_SUFFIX = "-func-client";
 
+    private Model model;
+
     public DependencyAnalysis scanPom(Path projectPath) {
         Path pomFile = projectPath.resolve("pom.xml");
         Set<DependantEntry> services = Sets.newHashSet();
@@ -29,6 +31,8 @@ public class PomAnalyzer {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         try (FileReader fileReader = new FileReader(pomFile.toFile())) {
             Model model = reader.read(fileReader);
+
+            this.model = model;
 
             model.getDependencies().forEach(dep -> {
                 if (SERVICES_GROUP.equals(dep.getGroupId())) {
@@ -50,6 +54,11 @@ public class PomAnalyzer {
         }
 
         return new DependencyAnalysis(services, functions);
+    }
+
+    public String getArtifactId() {
+        if (model == null) throw new IllegalStateException("scanPom() must be called first.");
+        return model.getArtifactId();
     }
 
     public record DependantEntry(String groupId, String artifactId, String version, String nameOfNote) {
